@@ -1,6 +1,13 @@
 #include "pico/stdlib.h"
 #include "hardware/pwm.h"
+/*working variables*/
+unsigned long lastTime;
+double Input, Output, Setpoint;
+double errSum, lastErr;
+double kp, ki, kd;
 
+void compute();
+void SetTunings(double Kp, double Ki, double Kd);
 uint32_t pwm_set_freq_duty(uint slice_num,
        uint chan,uint32_t f, int d);
 
@@ -27,4 +34,31 @@ uint32_t pwm_set_freq_duty(uint slice_num,
  pwm_set_wrap(slice_num, wrap);
  pwm_set_chan_level(slice_num, chan, wrap * d / 100);
  return wrap;
+}
+
+
+void Compute()
+{
+/*How long since we last calculated*/
+unsigned long now = millis();
+double timeChange = (double)(now - lastTime);
+ 
+/*Compute all the working error variables*/
+double error = Setpoint - Input;
+errSum += (error * timeChange);
+double dErr = (error - lastErr) / timeChange;
+ 
+/*Compute PID Output*/
+Output = kp * error + ki * errSum + kd * dErr;
+ 
+/*Remember some variables for next time*/
+lastErr = error;
+lastTime = now;
+}
+ 
+void SetTunings(double Kp, double Ki, double Kd)
+{
+kp = Kp;
+ki = Ki;
+kd = Kd;
 }
