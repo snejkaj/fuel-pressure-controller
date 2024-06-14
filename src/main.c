@@ -1,8 +1,18 @@
 #include "pico/stdlib.h"
 #include "hardware/pwm.h"
+#include <stdio.h>
+#include "hardware/adc.h"
 /*working variables*/
 unsigned long lastTime;
-double Input, Output, Setpoint;
+
+//Pressure from sensor
+double Input
+
+//pwm out to fuel pump
+double Output
+
+const uint delay = 10; // 10ms delay
+double Setpoint;
 double errSum, lastErr;
 double kp, ki, kd;
 
@@ -12,12 +22,23 @@ uint32_t pwm_set_freq_duty(uint slice_num,
        uint chan,uint32_t f, int d);
 
 int main(){
-    gpio_set_function(22, GPIO_FUNC_PWM);
-    uint slice_num = pwm_gpio_to_slice_num(22);
-    uint chan = pwm_gpio_to_channel(22);
-    pwm_set_freq_duty(slice_num, chan, 50, 75);
-    pwm_set_enabled(slice_num, true);
-    return 0;
+       uint16_t result;
+       const float conversion_factor;
+       stdio_init_all();
+       adc_init();
+       adc_gpio_init(26);
+       adc_select_input(0);
+       gpio_set_function(22, GPIO_FUNC_PWM);
+       uint slice_num = pwm_gpio_to_slice_num(22);
+       uint chan = pwm_gpio_to_channel(22);
+       while (1) {
+              // 12-bit conversion, assume max value == ADC_VREF == 3.3 V
+              conversion_factor = 3.3f / (1 << 12);
+              result = adc_read();
+              sleep_ms(delay);
+       pwm_set_freq_duty(slice_num, chan, 50, 75);
+       pwm_set_enabled(slice_num, true);
+       return 0;
 }
 
 uint32_t pwm_set_freq_duty(uint slice_num,
