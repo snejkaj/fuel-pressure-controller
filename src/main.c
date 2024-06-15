@@ -28,6 +28,7 @@ int main(){
        adc_init();
        adc_gpio_init(26);
        adc_select_input(0);
+       SetTunings(75,1,1);
        gpio_set_function(22, GPIO_FUNC_PWM);
        uint slice_num = pwm_gpio_to_slice_num(22);
        uint chan = pwm_gpio_to_channel(22);
