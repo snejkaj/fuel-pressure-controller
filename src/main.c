@@ -6,7 +6,7 @@
 unsigned long lastTime;
 
 //Pressure from sensor
-double Input
+double Result
 
 //pwm out to fuel pump
 double Output
@@ -22,7 +22,6 @@ uint32_t pwm_set_freq_duty(uint slice_num,
        uint chan,uint32_t f, int d);
 
 int main(){
-       uint16_t result;
        const float conversion_factor;
        stdio_init_all();
        adc_init();
@@ -37,7 +36,7 @@ int main(){
               conversion_factor = 3.3f / (1 << 12);
               result = adc_read();
               sleep_ms(delay);
-       pwm_set_freq_duty(slice_num, chan, 50, 75);
+       pwm_set_freq_duty(slice_num, chan, 50, (uint32_t)output);
        pwm_set_enabled(slice_num, true);
        return 0;
 }
