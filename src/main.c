@@ -15,6 +15,9 @@ const uint delay = 10; // 10ms delay
 double Setpoint;
 double errSum, lastErr;
 double kp, ki, kd;
+const double conversion_factor = 3.3f / (1 << 12);
+
+double read_dial();
 
 void Compute();
 void SetTunings(double Kp, double Ki, double Kd);
@@ -25,15 +28,17 @@ int main() {
     stdio_init_all();
     adc_init();
     adc_gpio_init(26);
+    adc_gpio_init(27);
     adc_select_input(0);
     SetTunings(75, 1, 1);
     gpio_set_function(22, GPIO_FUNC_PWM);
     uint slice_num = pwm_gpio_to_slice_num(22);
     uint chan = pwm_gpio_to_channel(22);
-    const float conversion_factor = 3.3f / (1 << 12);
 
     while (1) {
+        Setpoint = read_dial();
         // 12-bit conversion, assume max value == ADC_VREF == 3.3 V
+        adc_select_input(0);
         uint16_t raw = adc_read();
         input = raw * conversion_factor;
         Compute();
@@ -85,4 +90,11 @@ void SetTunings(double Kp, double Ki, double Kd)
 kp = Kp;
 ki = Ki;
 kd = Kd;
+}
+
+double read_dial()
+{
+    adc_select_input(1);
+    uint16_t raw = adc_read();
+    return raw * conversion_factor;
 }
