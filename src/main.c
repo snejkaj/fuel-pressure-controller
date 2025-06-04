@@ -18,6 +18,11 @@ double kp, ki, kd;
 const double conversion_factor = 3.3f / (1 << 12);
 
 double read_dial();
+void calibrate_dial();
+int select_variant(int variant_count);
+
+static double dial_min = 0.0;
+static double dial_max = 3.3;
 
 void Compute();
 void SetTunings(double Kp, double Ki, double Kd);
@@ -34,6 +39,10 @@ int main() {
     gpio_set_function(22, GPIO_FUNC_PWM);
     uint slice_num = pwm_gpio_to_slice_num(22);
     uint chan = pwm_gpio_to_channel(22);
+
+    calibrate_dial();
+    int variant = select_variant(3);
+    printf("Variant selected: %d\n", variant);
 
     while (1) {
         Setpoint = read_dial();
@@ -97,4 +106,35 @@ double read_dial()
     adc_select_input(1);
     uint16_t raw = adc_read();
     return raw * conversion_factor;
+}
+
+void calibrate_dial()
+{
+    dial_min = 3.3;
+    dial_max = 0.0;
+    uint32_t start = to_ms_since_boot(get_absolute_time());
+    while (to_ms_since_boot(get_absolute_time()) - start < 2000) {
+        double val = read_dial();
+        if (val < dial_min)
+            dial_min = val;
+        if (val > dial_max)
+            dial_max = val;
+        sleep_ms(10);
+    }
+}
+
+int select_variant(int variant_count)
+{
+    if (variant_count <= 0)
+        return 0;
+    double val = read_dial();
+    if (dial_max - dial_min <= 0.0)
+        return 0;
+    double norm = (val - dial_min) / (dial_max - dial_min);
+    int variant = (int)(norm * variant_count);
+    if (variant >= variant_count)
+        variant = variant_count - 1;
+    if (variant < 0)
+        variant = 0;
+    return variant;
 }
