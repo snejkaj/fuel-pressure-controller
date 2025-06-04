@@ -4,3 +4,4 @@ Project developed for a motorcycle.
 Harware used:
 * CBR600RR fuel pump
 * Fuel pressure sensor from Ford focus
+* Rotary dial for pressure adjustment
