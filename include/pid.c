@@ -1,6 +1,6 @@
 /*working variables*/
 unsigned long lastTime;
-double Input, Output, Setpoint;
+double input, output, Setpoint;
 double errSum, lastErr;
 double kp, ki, kd;
 void Compute()
@@ -10,12 +10,12 @@ unsigned long now = millis();
 double timeChange = (double)(now - lastTime);
  
 /*Compute all the working error variables*/
-double error = Setpoint - Input;
+double error = Setpoint - input;
 errSum += (error * timeChange);
 double dErr = (error - lastErr) / timeChange;
  
 /*Compute PID Output*/
-Output = kp * error + ki * errSum + kd * dErr;
+output = kp * error + ki * errSum + kd * dErr;
  
 /*Remember some variables for next time*/
 lastErr = error;
